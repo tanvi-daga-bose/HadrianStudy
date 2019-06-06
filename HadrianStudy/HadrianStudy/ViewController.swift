@@ -16,13 +16,17 @@ class ViewController: UIViewController {
     @IBOutlet weak var fileNameField: UITextField!
     @IBOutlet weak var collection: UIButton!
     
+    @IBOutlet weak var playbackStateTitle: UILabel!
     @IBOutlet weak var volTitle: UILabel!
+    @IBOutlet weak var playbackState: UILabel!
     
     var filePath = ""
     var collecting = false
     let audioSession = AVAudioSession.sharedInstance()
     var globalPrevVal = 0.0
-    
+    let musicPlayer = MPMusicPlayerController.systemMusicPlayer
+    var curState = "playing"
+
     // file creation
     func getPath(_ fileName: String) -> String {
         let path = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent(fileName).appendingPathExtension("csv").path
@@ -66,32 +70,88 @@ class ViewController: UIViewController {
         collection.isHidden = true
         volTitle.isHidden = true
         volume.isHidden = true
+        playbackState.isHidden = true
+        playbackStateTitle.isHidden = true
+        
+        musicPlayer.prepareToPlay()
+        musicPlayer.play()
+      /*  musicPlayer.prepareToPlay()
+        musicPlayer.play()
+        if (musicPlayer.playbackState == .playing){
+            print("playing")
+        }*/
         
         // ensures reading to same file when application is reactivated
         NotificationCenter.default.addObserver(self, selector: #selector(listenForVolumeButton), name: UIApplication.didBecomeActiveNotification, object: nil)
+  //      NotificationCenter.default.addObserver(self, selector: #selector(listenForPlayPause), name: NSNotification.Name.MPMusicPlayerControllerVolumeDidChange, object: nil)
+        Timer.scheduledTimer(timeInterval: 0.01, target: self, selector: #selector(listenForPlayPause), userInfo: nil, repeats: true)
     }
+    
+ /*  override func viewDidAppear(_ animated: Bool) {
+      //  NotificationCenter.default.addObserver(self, selector: #selector(listenForPlayPause), name: NSNotification.Name.MPMusicPlayerControllerPlaybackStateDidChange, object: self.musicPlayer)
+    print("in viewDidAppear")
+    musicPlayer.addObserver(self, forKeyPath: "playbackState", options: NSKeyValueObservingOptions.new, context: nil)
+    }*/
     
     @IBAction func toggleCollection(_ sender: Any) {
         if (!collecting){
             collecting = true
             getVolumeInitially()
             collection.setTitle("Stop collecting", for: UIControl.State.normal)
+            
         } else {
             collecting = false
             collection.setTitle("Start collecting", for: UIControl.State.normal)
         }
     }
     
+    func playbackStateAsString() -> String {
+        if (musicPlayer.playbackState == .paused) {
+            return "paused"
+        } else if (musicPlayer.playbackState == .playing){
+            return "playing"
+        }
+        return ""
+    }
+    
+    @objc func listenForPlayPause(){
+        var playOrPause = ""
+        if (musicPlayer.playbackState == .paused) {
+            playOrPause = "paused"
+        } else if (musicPlayer.playbackState == .playing){
+            playOrPause = "playing"
+        }
+        if(collecting){
+        playbackState.text = playOrPause
+        if(curState != playOrPause){
+            curState = playOrPause
+            let estTimeZoneStr = getCurTime()
+            let volWhenPressed = audioSession.outputVolume.description
+            let toAppend = estTimeZoneStr + "," + volWhenPressed + "," + playOrPause + "\n"
+            
+                addToFile(toAppend, filePath)
+            }
+        }
+       /* var playOrPause = playbackStateAsString()
+        if(playOrPause != curState){
+            playbackState.text = playOrPause
+            curState = playOrPause
+        }*/
+         // musicPlayer.addObserver(self, forKeyPath: "playbackState", options: NSKeyValueObservingOptions.new, context: nil)
+    }
+   
     
     @objc func listenForVolumeButton(){
         do {
             try audioSession.setCategory(AVAudioSession.Category.ambient)
             try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
+            
         } catch {
             print("errored")
         }
         audioSession.addObserver(self, forKeyPath: "outputVolume", options:
             NSKeyValueObservingOptions.new, context: nil)
+        
     }
     
     override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
@@ -101,14 +161,27 @@ class ViewController: UIViewController {
             if(Double(volUpdated) != globalPrevVal){
                 globalPrevVal = Double(volUpdated)
                 let estTimeZoneStr = getCurTime()
-                let toAppend = estTimeZoneStr + "," + volUpdated.description + "\n"
+                let toAppend = estTimeZoneStr + "," + volUpdated.description + "," + "volume\n"
                 if(collecting){
                     addToFile(toAppend, filePath)
                     volume.text = volUpdated.description
+                    
                 }
             }
         }
-        
+        /*else if(keyPath == "playbackState") {
+            print("keyPath is playbackState" )
+            switch (musicPlayer.playbackState){
+            case .paused:
+                print("paused")
+                break
+            case .playing:
+                print("playing")
+                break
+            default:
+                break
+            }
+        }*/
     }
     
     override func removeObserver(_ observer: NSObject, forKeyPath keyPath: String) {
@@ -123,7 +196,7 @@ class ViewController: UIViewController {
             volume.text = vol.description
             
             let estTimeZoneStr = getCurTime()
-            let toAppend = estTimeZoneStr + "," + vol.description + "\n"
+            let toAppend = estTimeZoneStr + "," + vol.description + "," + "initial\n"
             addToFile(toAppend, filePath)
         } catch {
             print("errored")
@@ -142,6 +215,9 @@ extension ViewController: UITextFieldDelegate {
         collection.isHidden = false
         volume.isHidden = false
         volTitle.isHidden = false
+        playbackState.isHidden = false
+        playbackStateTitle.isHidden = false
+        
         let fileName = textField.text!
         
         filePath = getPath(fileName)

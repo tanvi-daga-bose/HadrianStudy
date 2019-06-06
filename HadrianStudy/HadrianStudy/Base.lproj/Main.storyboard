@@ -47,6 +47,20 @@
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Playback State " textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="UgO-Uh-4ZX">
+                                <rect key="frame" x="77" y="335" width="118" height="21"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Um5-75-Vdp">
+                                <rect key="frame" x="209" y="335" width="95" height="21"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
@@ -54,6 +68,8 @@
                     <connections>
                         <outlet property="collection" destination="5yI-Si-UUn" id="tiK-mr-qjZ"/>
                         <outlet property="fileNameField" destination="Ygs-dW-yQs" id="gi3-dc-pLX"/>
+                        <outlet property="playbackState" destination="Um5-75-Vdp" id="tnI-4A-4ht"/>
+                        <outlet property="playbackStateTitle" destination="UgO-Uh-4ZX" id="a7u-Rs-cPC"/>
                         <outlet property="volTitle" destination="ZK8-Ru-pkd" id="p3F-xC-Z7H"/>
                         <outlet property="volume" destination="lI2-PM-XU5" id="qAd-CW-NaI"/>
                     </connections>
